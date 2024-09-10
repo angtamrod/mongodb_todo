@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Pruebas</h1>
+    <script>
+
+        /* fetch("/tareas")      //Esto es para el leer las tareas
+            .then(respuesta => respuesta.json())
+            .then(respuesta => {
+                console.log(respuesta);
+            });
+        */
+        // let datos = { tarea : "nueva tarea"};
+
+
+
+        /* fetch("/tareas/nueva", {   //Para crear tareas
+            method : "POST",
+            body : JSON.stringify({ tarea : "tarea nueva de prueba"}),
+            headers : {
+              "Content-type" : "application/json"
+            }
+        })//Esto sirve para convertir una peticion GET en una petición POST
+        .then(respuesta => respuesta.json())
+        .then(respuesta => {
+            console.log(respuesta);
+        });  */
+
+
+            /* fetch("/tareas/borrar/4", {      //Para borrar una tarea
+            method : "DELETE",
+            body : JSON.stringify({ tarea: "tarea nueva de prueba" }),
+            headers : {
+                "Content-type" : "application/json"
+            }
+            
+            })//Esto sirve para convertir una peticion GET en una petición POST
+            .then(respuesta => respuesta.text())
+            .then(respuesta => {
+                console.log(respuesta);
+                
+            }); */
+
+
+            /* fetch("/tareas/actualizar/2/5", { //Para ACTUALIZAR una tarea el estado (operación 2)
+            method : "PUT",
+            body : JSON.stringify({ tarea: "tarea nueva de prueba" }),
+            headers : {
+                "Content-type" : "application/json"
+            }
+            
+            })//Esto sirve para convertir una peticion GET en una petición POST
+            .then(respuesta => respuesta.text())
+            .then(respuesta => {
+                console.log(respuesta);
+                
+            }); */
+
+            fetch("/tareas/actualizar/1/5", { //Para ACTUALIZAR una tarea el texto (operación 1)
+            method : "PUT",
+            body : JSON.stringify({ tarea: "comenzar REACT" }),
+            headers : {
+                "Content-type" : "application/json"
+            }
+            
+            })//Esto sirve para convertir una peticion GET en una petición POST
+            .then(respuesta => respuesta.text())
+            .then(respuesta => {
+                console.log(respuesta);
+                
+            });
+
+            /* fetch("/tareas/actualizar/1/3", {
+            method : "PUT",
+            body : JSON.stringify({ tarea : "nuevo texto para la tarea" }),
+            headers : {//Necesitamos poner en el headers el tipo de informción que va dentro
+                "Content-type" : "application/json"
+            }
+            
+            })
+            .then(respuesta => respuesta.text())
+            .then(respuesta => {
+                console.log(respuesta);
+                
+            }); */
+
+    </script>
+</body>
+</html>
