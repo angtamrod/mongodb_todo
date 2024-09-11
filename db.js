@@ -1,10 +1,14 @@
+import dotenv from 'dotenv';
 //Importamos mongoDB
 import { MongoClient,ObjectId } from "mongodb";
 
-const url = "mongodb+srv://tamayorodriguezang:DB.root@prueba.y1yzi.mongodb.net/";
+//const url = "mongodb+srv://tamayorodriguezang:DB.root@prueba.y1yzi.mongodb.net/";
+//const url = process.env.MONG_URL;
+
+dotenv.config();
 
 function conectar(){
-    return MongoClient.connect(url);
+    return MongoClient.connect(process.env.MONG_URL);
 }
 
 //1. Función para obtener todas las tareas existentes de la base de datos de mongoDB
@@ -15,7 +19,9 @@ export function leerTareas(){
             const coleccion = conexion.db("tareas").collection("tareas");
             let tareas = await coleccion.find({}).toArray();
             conexion.close();
-            ok(tareas);
+            ok(tareas.map(({_id,tarea,terminada}) => {
+                return {id : _id, tarea, terminada}
+            } ));
 
         }catch(error){
             ko({ error: "error en la base de datos" });
@@ -25,15 +31,18 @@ export function leerTareas(){
 }
 
 //2. Función para crear/actualizar datos de la base de datos pasándole como argumento la tarea
-export function nuevaTarea(tarea){
+export function nuevaTarea(texto){
     return new Promise(async (ok,ko) => {
         try{
-            const conexion = await conectar();
-            const coleccion = conexion.db("tareas").collection("tareas");
-            let {insertedId} = await coleccion.insertOne({tarea});
+            let conexion = await conectar();
+            let coleccion = conexion.db("tareas").collection("tareas");
+
+            //Prueba: let resultado = coleccion.insertOne({ tarea texto, terminada : false })
+            let {insertedId} = await coleccion.insertOne({texto});
 
             conexion.close();
 
+            //Prueba: ok(resultado)
             ok(insertedId);
         }catch(error){
             //Si falla nos mostrará un error en la base de datos
@@ -54,7 +63,7 @@ export function borrarTarea(id){
             const coleccion = conexion.db("tareas").collection("tareas");
 
           
-            let deletedCount = await coleccion.deleteOne({_id : new ObjectId(id) });
+            let {deletedCount} = await coleccion.deleteOne({_id : new ObjectId(id) });
 
             conexion.close();
 
@@ -71,12 +80,17 @@ export function borrarTarea(id){
 export function actualizarEstado(id){
     return new Promise(async (ok,ko) => {
         try{
-            const conexion = await conectar();
-            const coleccion = conexion.db("tareas").collection("tareas");
+            let conexion = await conectar();
+            let coleccion = conexion.db("tareas").collection("tareas");
 
+            //PARA PROBAR: let resultado = await coleccion.findOne({_id : new ObjectId(id) } );
+            //let resultado = await coleccion.updateOne({_id : new ObjectId(id) }, { $set: { terminada: { $not: "$terminada" } } } );
             //El primer {} especifica que tarea queremos modificar
-            let modifiedCount = await coleccion.updateOne({_id : new ObjectId(id) }, { $set: { terminada: { $not: "$terminada" } } } );
 
+            let {terminada} = await coleccion.findOne({_id : new ObjectId(id) } );
+            let {modifiedCount} = await coleccion.updateOne({_id : new ObjectId(id) }, { $set: { terminada : !terminada }});
+
+            //Es importante comprobar manualmente que el toggle funciona
             conexion.close();
             
             ok(modifiedCount); 
@@ -92,12 +106,13 @@ export function actualizarTexto(id,texto){
         try{
             //let {count} = await conexion`UPDATE tareas SET tarea = ${texto} WHERE id = ${id}`;
 
-            const conexion = await conectar();
-            const coleccion = conexion.db("tareas").collection("tareas");
+            let conexion = await conectar();
+            let coleccion = conexion.db("tareas").collection("tareas");
 
-            let modifiedCount = await coleccion.updateOne({_id : new ObjectId(id) }, { $set: { tarea: texto } } );
+            //Para probar: let resultado = await coleccion.updateOne({_id : new ObjectId(id) }, { $set: { tarea: texto } } );
+            let {modifiedCount} = await coleccion.updateOne({_id : new ObjectId(id) }, { $set: { tarea: texto } } );
             conexion.close();
-
+            //ok(resultado);
             ok(modifiedCount);
 
         }catch(error){
@@ -129,7 +144,3 @@ export function actualizarTexto(id,texto){
 //leerTareas()
 //.then(x => console.log(x))
 //.catch(x => console.log(x)) 
-
- 
-//module.exports = {leerTareas,nuevaTarea,borrarTarea,actualizarEstado,actualizarTexto};
-

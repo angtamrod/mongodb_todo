@@ -1,9 +1,10 @@
-
-import { configDotenv } from "dotenv";
+import dotenv from 'dotenv';
 
 import express from "express";
 import cors from "cors";
 import { leerTareas,nuevaTarea,borrarTarea,actualizarEstado,actualizarTexto } from "./db.js";
+
+dotenv.config();
 
 const servidor = express();
 
@@ -14,7 +15,6 @@ servidor.use(express.json());
 if(process.env.TEST){
     servidor.use("/pruebas", express.static("./pruebas")); 
 }
-
 
 
 servidor.get("/tareas", async (peticion,respuesta) => {
@@ -28,26 +28,40 @@ servidor.get("/tareas", async (peticion,respuesta) => {
 });
 
 servidor.post("/tareas/nueva", async (peticion,respuesta,siguiente) => {
-        try{
-            let id = await nuevaTarea(peticion.body.tarea);
-            return respuesta.json({id});
-        }catch(error){
-            respuesta.status(500);
-            return respuesta.json({ error : "error en el servidor" }) 
-        }
-        siguiente({ error : "no tiene la propiedad TAREA" });
-
+        let texto = peticion.body.tarea;
+        if(texto && texto.trim() != ""){
+                try{
+                    let id = await nuevaTarea(texto);
+                    return respuesta.json({id});
+                }catch(error){
+                        respuesta.status(500);
+                        return respuesta.json({ error : "error en el servidor" }) 
+                }
+        }siguiente({ error : "no tiene la propiedad TAREA" });
+      
 });
 
 servidor.put("/tareas/actualizar/texto/:id([0-9]+)", async (peticion,respuesta,siguiente) => {
-    let id = peticion.params;
-    let tarea = peticion.body.tarea;
+    
+    let id = peticion.params.id;
+    let texto = peticion.body.tarea;
 
-    if (operacion == 1 && (!tarea || tarea.trim() == "")){
-        return siguiente({ error : "no tiene la propiedad TAREA" });  
-    }
+    if(texto && texto.trim() != ""){
+        try{
+            let cantidad = await actualizarTexto(id, texto);
+            respuesta.json({ resultado : cantidad ? "ok" : "ko"});
+        }catch(error){
+                respuesta.status(500);
+                return respuesta.json({ error : "error en el servidor" }) 
+        }
+        }siguiente({ error : "no tiene la propiedad TAREA" });
+
+});
+
+servidor.put("/tareas/actualizar/estado/:id([0-9]+)", async (peticion,respuesta) => {
     try{
-
+        let cantidad = await actualizarEstado(peticion.params.id);
+        respuesta.json({ resultado : cantidad ? "ok" : "ko"});
     }catch(error){
         respuesta.status(500);
         respuesta.json({ error : "error en el servidor" })
@@ -102,4 +116,4 @@ servidor.use((peticion,respuesta) => {
 }) 
 
 
-servidor.listen(3000);
+servidor.listen(process.env.PORT);
