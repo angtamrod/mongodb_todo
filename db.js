@@ -17,11 +17,15 @@ export function leerTareas(){
         try{
             const conexion = await conectar();
             const coleccion = conexion.db("tareas").collection("tareas");
+            
             let tareas = await coleccion.find({}).toArray();
+            
             conexion.close();
+            
             ok(tareas.map(({_id,tarea,terminada}) => {
-                return {id : _id, tarea, terminada}
-            } ));
+                return {id :_id, tarea, terminada};
+                } 
+            ));
 
         }catch(error){
             ko({ error: "error en la base de datos" });
@@ -59,8 +63,8 @@ export function nuevaTarea(texto){
 export function borrarTarea(id){
     return new Promise(async (ok,ko) => {
         try{
-            const conexion = await conectar();
-            const coleccion = conexion.db("tareas").collection("tareas");
+            let conexion = await conectar();
+            let coleccion = conexion.db("tareas").collection("tareas");
 
           
             let {deletedCount} = await coleccion.deleteOne({_id : new ObjectId(id) });
@@ -134,8 +138,10 @@ export function actualizarTexto(id,texto){
 //.then(x => console.log(x))
 //.catch(x => console.log(x)) 
 
-//actualizarEstado("66e0234ee3fe7eabd1643f6c", "$terminada")
+//actualizarEstado("66dedd345ca1b6af74184984", false)
 //.then(x => console.log(x))
+
+
 
 //actualizarTexto('66e0234ee3fe7eabd1643f6c', "un nuevo texto")
 //.then(x => console.log(x))

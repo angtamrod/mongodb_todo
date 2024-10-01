@@ -1,3 +1,4 @@
+//iMPORTACIONES
 import dotenv from 'dotenv';
 
 import express from "express";
@@ -8,8 +9,10 @@ dotenv.config();
 
 const servidor = express();
 
+//MIDDLEWARE PARA PUESTA EN MARCHA DEL SERVIDOR
 servidor.use(cors()); 
 
+//Esto lo que pasa es cualquier petición que venga la pasa JSON.pase() y lo guarda en peticion.body, si no invoca un error
 servidor.use(express.json());
 
 if(process.env.TEST){
@@ -17,6 +20,7 @@ if(process.env.TEST){
 }
 
 
+//MIDDLEWARES PARA LAS PETICIONES
 servidor.get("/tareas", async (peticion,respuesta) => {
     try{
         let tareas = await leerTareas();
@@ -41,7 +45,7 @@ servidor.post("/tareas/nueva", async (peticion,respuesta,siguiente) => {
       
 });
 
-servidor.put("/tareas/actualizar/texto/:id([0-9]+)", async (peticion,respuesta,siguiente) => {
+servidor.put("/tareas/actualizar/texto/:id([0-9a-f]{24})", async (peticion,respuesta,siguiente) => {
     
     let id = peticion.params.id;
     let texto = peticion.body.tarea;
@@ -58,7 +62,7 @@ servidor.put("/tareas/actualizar/texto/:id([0-9]+)", async (peticion,respuesta,s
 
 });
 
-servidor.put("/tareas/actualizar/estado/:id([0-9]+)", async (peticion,respuesta) => {
+servidor.put("/tareas/actualizar/estado/:id([0-9a-f]{24})", async (peticion,respuesta) => {
     try{
         let cantidad = await actualizarEstado(peticion.params.id);
         respuesta.json({ resultado : cantidad ? "ok" : "ko"});
@@ -92,11 +96,11 @@ servidor.put("/tareas/actualizar/estado/:id([0-9]+)", async (peticion,respuesta)
     }
 }); */
 
-servidor.delete("/tareas/borrar/:id([0-9]+)", async (peticion,respuesta) => {//id es el nombre del parámetro los (:) lo identificará como dinámico
+servidor.delete("/tareas/borrar/:id([0-9a-f]{24})", async (peticion,respuesta) => {//id es el nombre del parámetro los (:) lo identificará como dinámico
                                                                             //Le hemos dicho que puede ser uno o más (+) dígitos del 0 al 9
         try{
             let cantidad = await borrarTarea(peticion.params.id);
-            respuesta.json({ resultado : cantidad ? "ok" : "ko"});
+            respuesta.json({ resultado : cantidad ? "ok" : "ko" });
         }catch(error){
             respuesta.status(500);
             respuesta.json({ error : "error en el servidor"});
@@ -105,6 +109,9 @@ servidor.delete("/tareas/borrar/:id([0-9]+)", async (peticion,respuesta) => {//i
    
 );
 
+
+//CONFIGURAR MIDDLEWARE DE ERROR: 
+//CUANDO HACEMOS servidor.use(express.json()); DEJAMOS CONFIGURADO ESTO, YA QUE SI HAY ALGÚN ERROR EN LA PETICIÓN NOS LLEVARÁ A ESTO
  servidor.use((error,peticion,respuesta,siguiente) => {
     respuesta.status(400);
     respuesta.json({ error : "error en la petición" });
@@ -115,5 +122,5 @@ servidor.use((peticion,respuesta) => {
     respuesta.json({ error : "error recurso no encontrado" });
 }) 
 
-
+//CONFIGURADOR DEL PUERTO
 servidor.listen(process.env.PORT);
